@@ -120,6 +120,7 @@ class DealOrder extends ActiveRecord {
                     'unitRetrievedInterestAmt' => $retrievedInterestAmt / $creditCount, //每份债权已回收利息
                     'totalAmt' => $creditUnitPrice * $creditTransferShares, //转让总价格
                     'totalFeeAmt' => $creditUnitPrincipalAmt * (1 - $creditDiscountRate / 100) * $creditTransferShares * $creditFeeRate, //转让总费用（平台收取，一般千三）
+                    'totalIncomingAmt'=>$creditUnitIncomingAmt * $creditTransferShares, //预计输入金额
                     'holdingPeriodInDay'=>$holdingPeriodInDay,
                     'user_id' => $model->uid,
                     'order_id' => $model->deal_number,
