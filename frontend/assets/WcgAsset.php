@@ -14,8 +14,8 @@ class WcgAsset extends AssetBundle {
     public $baseUrl = '@web';
     public $css = [
 //        'css/site.css',
-        'http://dev.wangcaigu.com/template/default/Public/css/base.css',
-        'http://dev.wangcaigu.com/template/default/Public/css/user.css',
+        'http://www.wangcaigu.com/template/default/Public/css/base.css',
+        'http://www.wangcaigu.com/template/default/Public/css/user.css',
     ];
     public $js = [
     ];
