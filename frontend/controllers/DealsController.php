@@ -48,12 +48,12 @@ class DealsController extends Controller {
             }
             else $data = $model->errors;
         }
-        if (Yii::$app->request->isAjax)
-        {
+//        if (Yii::$app->request->isAjax)
+//        {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return ['respCode'=>$respCode, 'data'=>$data];
-        }
-        var_dump(['respCode'=>$respCode, 'data'=>$data]);
+//        }
+//        var_dump(['respCode'=>$respCode, 'data'=>$data]);
     }
 
     public function actionCredit($orderNumber, $transferShares = 1, $discountRate = 0)
