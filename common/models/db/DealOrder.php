@@ -20,7 +20,7 @@ class DealOrder extends ActiveRecord {
         return '{{%deal_order}}';
     }
 
-    public static function getCreditDetail($orderId)
+    public static function getCreditDetail($orderId, $discountRate)
     {
         $data = [];
         $model = static::find()->where('status=2 and deal_number=:orderId', [':orderId'=>$orderId])->one();
@@ -102,7 +102,7 @@ class DealOrder extends ActiveRecord {
                      */
                     $creditLeavingPeriodInDay = static::loanTermCalc(null, null, $deal->deal_end_date, 'd', false)['period']->days + 1;
                     $creditUnitValue = $creditUnitPrincipalAmt + $creditUnitAccruedInterestAmt;
-                    $creditDiscountRate = 0;
+                    $creditDiscountRate = $discountRate;
                     $creditUnitPrice = $creditUnitPrincipalAmt * (1 - $creditDiscountRate / 100) + $creditUnitAccruedInterestAmt;
                     $creditUnitActualValue = $creditUnitPrincipalAmt + $creditUnitInterestAmt;
                     $creditFeeRate = 0.003;

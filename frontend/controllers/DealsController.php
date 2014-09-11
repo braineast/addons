@@ -29,11 +29,11 @@ class DealsController extends Controller {
     /**
      * @param $id 投标订单id
      */
-    public function actionCreate($orderNumber, $transferShares)
+    public function actionCreate($orderNumber, $transferShares=1, $discountRate=0)
     {
         $respCode = -1;
         $data = null;
-        if (/*DealOrder::canBeTransfer($orderNumber) && */$creditData = DealOrder::getCreditDetail($orderNumber))
+        if (/*DealOrder::canBeTransfer($orderNumber) && */$creditData = DealOrder::getCreditDetail($orderNumber, $discountRate))
         {
             $model = new Credit();
             $model->transfer_shares = $transferShares;
@@ -76,12 +76,11 @@ class DealsController extends Controller {
             'respCode' => $respCode,
             'data' => $creditData
         ];
-        if (Yii::$app->request->isAjax)
-        {
+//        if (Yii::$app->request->isAjax)
+//        {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return $ret;
-        }
-        var_dump($ret);
+//        }
     }
 
     public function actionTendercancel()
