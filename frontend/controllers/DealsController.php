@@ -33,7 +33,7 @@ class DealsController extends Controller {
     {
         $respCode = -1;
         $data = null;
-        if (/*DealOrder::canBeTransfer($orderNumber) && */$creditData = DealOrder::getCreditDetail($orderNumber, $discountRate))
+        if (/*DealOrder::canBeTransfer($orderNumber) && */$creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate))
         {
             $model = new Credit();
             $model->transfer_shares = $transferShares;
