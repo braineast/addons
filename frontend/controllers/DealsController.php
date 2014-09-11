@@ -76,12 +76,12 @@ class DealsController extends Controller {
             'respCode' => $respCode,
             'data' => $creditData
         ];
-        if (Yii::$app->request->isAjax)
-        {
+//        if (Yii::$app->request->isAjax)
+//        {
             Yii::$app->response->format = Response::FORMAT_JSON;
             return $ret;
-        }
-        var_dump($ret);
+//        }
+//        var_dump($ret);
     }
 
     public function actionTendercancel()
