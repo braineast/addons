@@ -20,7 +20,7 @@ class DealOrder extends ActiveRecord {
         return '{{%deal_order}}';
     }
 
-    public static function getCreditDetail($orderId, $discountRate)
+    public static function getCreditDetail($orderId, $transferShares, $discountRate)
     {
         $data = [];
         $model = static::find()->where('status=2 and deal_number=:orderId', [':orderId'=>$orderId])->one();
@@ -68,7 +68,7 @@ class DealOrder extends ActiveRecord {
                 if ($creditCount)
                 {
                     /** @var integer $creditTransferShares 债权转让份数 */
-                    $creditTransferShares = 1;
+                    $creditTransferShares = $transferShares;
 
                     /**
                      * 当期利息分账，债权转让时，只有当期中尚未还款的利息与债权出让人有关系，因此只针对当期未还的利息进行分账
@@ -115,6 +115,11 @@ class DealOrder extends ActiveRecord {
                     'deal_title' => $deal->title,
                     'deal_rate' => $deal->syl,
                     'deal_end_date' => date('Y-m-d', $deal->deal_end_date),
+                    'bidAmt' => $model->order_money, //原始标的投资金额
+                    'unitRetrievedPrincipalAmt' => $retrievedPrincipalAmt / $creditCount, //每份债权已回收本金
+                    'unitRetrievedInterestAmt' => $retrievedInterestAmt / $creditCount, //每份债权已回收利息
+                    'totalAmt' => $creditUnitPrice * $creditTransferShares, //转让总价格
+                    'totalFeeAmt' => $creditUnitPrincipalAmt * (1 - $creditDiscountRate / 100) * $creditTransferShares * $creditFeeRate, //转让总费用（平台收取，一般千三）
                     'holdingPeriodInDay'=>$holdingPeriodInDay,
                     'user_id' => $model->uid,
                     'order_id' => $model->deal_number,
@@ -146,7 +151,7 @@ class DealOrder extends ActiveRecord {
 
     public static function canBeTransfer($orderId)
     {
-        $data = static::getCreditDetail($orderId);
+        $data = static::getCreditDetail($orderId, 1, 0);
         if ($data && isset($data['holdingPeriodInDay']))
         {
             if ($data['holdingPeriodInDay'] >= 20 && $data['shares']) return true;
