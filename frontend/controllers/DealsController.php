@@ -56,7 +56,7 @@ class DealsController extends Controller {
         var_dump(['respCode'=>$respCode, 'data'=>$data]);
     }
 
-    public function actionCredit($orderNumber)
+    public function actionCredit($orderNumber, $discountRate = 0)
     {
         $respCode = -1; //未知错误
         $creditData = null;
@@ -68,7 +68,7 @@ class DealsController extends Controller {
         }
 //        elseif(DealOrder::canBeTransfer($orderNumber))
 //        {
-            $creditData = DealOrder::getCreditDetail($orderNumber);
+            $creditData = DealOrder::getCreditDetail($orderNumber, $discountRate);
 //        }
 //        else $respCode = -2; //该订单不可被转让
         if ($creditData) $respCode = 0;
