@@ -80,6 +80,7 @@ class DealsController extends Controller {
                 'data' => $creditData
             ];
         }
+        var_dump($ret);
 //        if (Yii::$app->request->isAjax)
 //        {
             Yii::$app->response->format = Response::FORMAT_JSON;
