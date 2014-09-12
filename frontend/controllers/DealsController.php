@@ -164,13 +164,12 @@ class DealsController extends Controller {
         if ($respCode == -2) $message = '指定的债权不存在，无法完成购买！';
         if ($respCode == -3) $message = '债权未在发售中，无法完成购买！';
         if ($respCode == -4) $message = '债权数量不足，无法完成购买！';
-//        Yii::$app->response->format = Response::FORMAT_JSON;
-        $data =  [
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return  [
             'respCode'=>$respCode,
             'link' => $link,
             'message'=> $message
         ];
-        var_dump($data);
     }
 
     public function actionOpen()
