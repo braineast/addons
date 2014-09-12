@@ -33,6 +33,7 @@ create table if not exists `cp_credit_order`
 (
   id int(11) unsigned not null auto_increment primary key,
   credit_id int unsigned not null,
+  deal_id int unsigned not null,
   user_id int unsigned not null,
   serial char(32) not null,
   shares int unsigned not null comment '购买份数',

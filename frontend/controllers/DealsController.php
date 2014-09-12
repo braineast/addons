@@ -117,6 +117,7 @@ class DealsController extends Controller {
                     $deal = Deal::find()->where('deal_id=:dealId', [':dealId'=>$bidOrder->deal_id])->one();
                     $order = new CreditOrder();
                     $order->credit_id = $creditId;
+                    $order->deal_id = $credit->deal_id;
                     $order->user_id = $userId;
                     $order->shares = $shares;
                     $order->amount = $credit->unit_price * $shares;
