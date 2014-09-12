@@ -58,7 +58,7 @@ class DealsController extends Controller {
         if (DealOrder::canBeTransfer($orderNumber) && $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate))
         {
             if ($creditId)
-                $model = Credit::find($creditId);
+                $model = Credit::find()->where('id=:creditId', [':creditId'=>$creditId])->one();
             else
                 $model = new Credit();
 
