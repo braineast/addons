@@ -58,6 +58,7 @@ class CnpnrController extends Controller
                 }
                 else
                 {
+                    /*
                     //Update user data that belonging to account balance
                     $acctSeek = [
                         $credit->user_id,
@@ -76,6 +77,7 @@ class CnpnrController extends Controller
                             $acct->save();
                         }
                     }
+                    */
                     $order->status = CreditOrder::STATUS_PAID;
                     if ($order->validate())
                     {
