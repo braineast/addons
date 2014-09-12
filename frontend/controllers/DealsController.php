@@ -101,7 +101,7 @@ class DealsController extends Controller {
      * @param $shares
      * @param $userId
      */
-    public function actionBuy($creditId, $shares, $userId)
+    public function actionBuy($creditId, $shares, $userId, $orderId)
     {
         $respCode = -1;
         $link = null;
@@ -116,6 +116,7 @@ class DealsController extends Controller {
                     $bidOrder = DealOrder::find()->where('deal_number=:orderId', [':orderId'=>$credit->order_id])->one();
                     $deal = Deal::find()->where('deal_id=:dealId', [':dealId'=>$bidOrder->deal_id])->one();
                     $order = new CreditOrder();
+                    $order->serial = $orderId;
                     $order->credit_id = $creditId;
                     $order->deal_id = $credit->deal_id;
                     $order->user_id = $userId;

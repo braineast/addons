@@ -75,7 +75,7 @@ class CreditOrder extends ActiveRecord
     {
         return [
             CreditOrderCalcBehavior::className(),
-            OrderSerialBehavior::className(),
+//            OrderSerialBehavior::className(),
             TimestampBehavior::className(),
         ];
     }
