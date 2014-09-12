@@ -169,4 +169,20 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+
+    public function actionTest()
+    {
+        $originalHtContent = '借款金额：10,000.00元人民币';
+        $res = null;
+        preg_match('/借款金额：(.+)元人民币/', $originalHtContent, $res);
+        if (isset($res[1]) && $res[1])
+        {
+            $originalAmt =preg_replace('/,/', '', $res[1]);
+            $amt = $originalAmt - preg_replace('/,/', '', $param['CreditAmt']);
+            $originalHtContent = preg_replace('/借款金额：(.+)元人民币/', sprintf("借款金额：%s元人民币", number_format($amt, 2)), $originalHtContent);
+            //save $originalHtContent to db!!!!
+        }
+
+        var_dump($originalHtContent);
+    }
 }
