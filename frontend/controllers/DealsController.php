@@ -104,6 +104,8 @@ class DealsController extends Controller {
     public function actionBuy($creditId, $shares, $userId)
     {
         $respCode = -1;
+        $link = null;
+        $message = '请求异常';
         if ($credit = Credit::findOne($creditId))
         {
             if ($credit->in_stock_shares >= $shares)
@@ -148,14 +150,20 @@ class DealsController extends Controller {
                         $cnpnr->BidDetails = Json::encode($bidDetails);
                         $cnpnr->ordId = $order->serial;
                         $cnpnr->ordDate = substr($order->serial, 0, 8);
-                        $this->redirect($cnpnr->getLink());
+                        $link = $cnpnr->getLink();
                     }
                 }
             }
             else $respCode = -2; //库存不足
         }
-        else exit('指定的债权不存在，无法完成购买！');
-        if ($respCode == -2) exit('债权数量不足，无法完成购买！');
+        else $message='指定的债权不存在，无法完成购买！';
+        if ($respCode == -2) $message = '债权数量不足，无法完成购买！';
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return [
+            'respCode'=>$respCode,
+            'link' => $link,
+            'message'=> $message
+        ];
     }
 
     public function actionOpen()
