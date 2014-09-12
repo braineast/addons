@@ -138,6 +138,9 @@ class DealOrder extends ActiveRecord {
                     'unit_fee_amt'=>$creditUnitFeeAmt,
                     'unit_incoming_amt'=>$creditUnitIncomingAmt,
                 ];
+
+                var_dump($data);
+                exit;
             }
             else die('订单虽然是正确的，但很显然，该订单所依附的标的已执行完毕，不可进行债权转让了！');
         }
