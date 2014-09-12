@@ -137,6 +137,7 @@ class DealOrder extends ActiveRecord {
                     'transfer_fee_rate'=>$creditFeeRate,
                     'unit_fee_amt'=>$creditUnitFeeAmt,
                     'unit_incoming_amt'=>$creditUnitIncomingAmt,
+                    'accruedInterestDays' => $accruedInterestDays,
                 ];
             }
             else die('订单虽然是正确的，但很显然，该订单所依附的标的已执行完毕，不可进行债权转让了！');
