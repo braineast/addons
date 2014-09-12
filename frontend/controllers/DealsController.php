@@ -62,11 +62,11 @@ class DealsController extends Controller {
         $creditData = null;
         $ret = null;
         $credit = Credit::find()->where('order_id=:orderId', [':orderId'=>$orderNumber])->one();
-        /*if ($credit)
+        if ($credit)
         {
             $creditData = $credit->attributes;
         }
-        else*/if(DealOrder::canBeTransfer($orderNumber))
+        elseif(DealOrder::canBeTransfer($orderNumber))
         {
             $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate);
         }
