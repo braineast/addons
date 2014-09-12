@@ -66,16 +66,20 @@ class DealsController extends Controller {
         {
             $creditData = $credit->attributes;
         }
-//        elseif(DealOrder::canBeTransfer($orderNumber))
-//        {
+        else//if(DealOrder::canBeTransfer($orderNumber))
+        {
             $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate);
-//        }
+        }
 //        else $respCode = -2; //该订单不可被转让
-        if ($creditData) $respCode = 0;
-        $ret = [
-            'respCode' => $respCode,
-            'data' => $creditData
-        ];
+        if ($creditData)
+        {
+            foreach($creditData as $k => $v) if (preg_match('/amt|price|value/i', $k)) $creditData[$k] = number_format($v, 2);
+            $respCode = 0;
+            $ret = [
+                'respCode' => $respCode,
+                'data' => $creditData
+            ];
+        }
 //        if (Yii::$app->request->isAjax)
 //        {
             Yii::$app->response->format = Response::FORMAT_JSON;
