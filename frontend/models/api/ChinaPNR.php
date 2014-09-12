@@ -284,7 +284,7 @@ class ChinaPNR {
         $amount = number_format($amount, 2, '.', '');
         $feeAmt = number_format($feeAmt, 2, '.', '');
         $this->params[self::PARAM_CMDID] = self::CMD_CREDITASSIGN;
-        $this->params[self::PARAM_RETURL] = Yii::$app->params['api']['cnpnr']['baseSiteHost'].'/HuifuPay/CreditReturnBack';
+//        $this->params[self::PARAM_RETURL] = Yii::$app->params['api']['cnpnr']['baseSiteHost'].'/HuifuPay/CreditReturnBack';
         $this->params[self::PARAM_BGRETURL] = Yii::$app->params['api']['cnpnr']['baseSiteHost'].'/HuifuPay/CreditReturnBack';
         $this->params[self::PARAM_SELLCUSTID] = $sellCustId; //债权转让转让人客户号
         $this->params[self::PARAM_BUYCUSTID] = $buyCustId;
