@@ -18,6 +18,7 @@ create table if not exists `cp_credit`
   actual_unit_value decimal(12, 6) not null comment '每份实际价值，即应收本息',
   unit_value decimal(12, 6) not null comment '债权价值，即unit_principal_amt与unit_accrued_interest_amt的合计',
   unit_price decimal(12, 6) not null comment '售卖价格，即unit_value减去转让人对该债权的折让金额后的数据',
+  unit_incoming_amt decimal(12, 6) not null comment '每份债权的实际收入金额',
   transfer_fee_rate decimal(12, 3) not null default 0.005 comment '转让手续费率，默认为千五',
   unit_fee_amt decimal(12, 6) not null default 0.000000 comment '每份手续费金额',
   status tinyint not null default 0 comment '0=>正在转让, 1=>转让完成',

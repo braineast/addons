@@ -68,7 +68,7 @@ class DealOrder extends ActiveRecord {
                 if ($creditCount)
                 {
                     /** @var integer $creditTransferShares 债权转让份数 */
-                    $creditTransferShares = $transferShares;
+                    $creditTransferShares = min($transferShares, $creditCount);
 
                     /**
                      * 当期利息分账，债权转让时，只有当期中尚未还款的利息与债权出让人有关系，因此只针对当期未还的利息进行分账
