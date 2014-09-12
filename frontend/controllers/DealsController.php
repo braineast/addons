@@ -153,6 +153,7 @@ class DealsController extends Controller {
                             $cnpnr->ordId = $order->serial;
                             $cnpnr->ordDate = substr($order->serial, 0, 8);
                             $link = $cnpnr->getLink();
+                            $respCode = 0;
                         }
                     }
                 }
