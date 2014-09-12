@@ -154,6 +154,7 @@ class DealsController extends Controller {
                             $cnpnr->ordDate = substr($order->serial, 0, 8);
                             $link = $cnpnr->getLink();
                             $respCode = 0;
+                            $message = '成功';
                         }
                     }
                 }
