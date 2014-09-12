@@ -154,6 +154,8 @@ class DealsController extends Controller {
             }
             else $respCode = -2; //库存不足
         }
+        else exit('指定的债权不存在，无法完成购买！');
+        if ($respCode == -2) exit('债权数量不足，无法完成购买！');
     }
 
     public function actionOpen()
