@@ -108,56 +108,61 @@ class DealsController extends Controller {
         $message = '请求异常';
         if ($credit = Credit::findOne($creditId))
         {
-            if ($credit->in_stock_shares >= $shares)
+            if ($credit->status == 0)
             {
-                $creditPrincipalAmt = number_format($credit->unit_principal_amt * $shares, 2, '.', '');
-                $bidOrder = DealOrder::find()->where('deal_number=:orderId', [':orderId'=>$credit->order_id])->one();
-                $deal = Deal::find()->where('deal_id=:dealId', [':dealId'=>$bidOrder->deal_id])->one();
-                $order = new CreditOrder();
-                $order->credit_id = $creditId;
-                $order->user_id = $userId;
-                $order->shares = $shares;
-                $order->amount = $credit->unit_price * $shares;
-                $order->fee = $credit->unit_fee_amt * $shares;
-                if ($order->validate())
+                if ($credit->in_stock_shares >= $shares)
                 {
-                    if ($order->save())
+                    $creditPrincipalAmt = number_format($credit->unit_principal_amt * $shares, 2, '.', '');
+                    $bidOrder = DealOrder::find()->where('deal_number=:orderId', [':orderId'=>$credit->order_id])->one();
+                    $deal = Deal::find()->where('deal_id=:dealId', [':dealId'=>$bidOrder->deal_id])->one();
+                    $order = new CreditOrder();
+                    $order->credit_id = $creditId;
+                    $order->user_id = $userId;
+                    $order->shares = $shares;
+                    $order->amount = $credit->unit_price * $shares;
+                    $order->fee = $credit->unit_fee_amt * $shares;
+                    if ($order->validate())
                     {
-                        $cnpnr = new ChinaPNR();
-                        $cnpnr->creditAssign(
-                            CnpnrAccount::find()->where('uid=:userId', [':userId'=>$bidOrder->uid])->one()->UsrCustId,
-                            CnpnrAccount::find()->where('uid=:userId', [':userId'=>$userId])->one()->UsrCustId,
-                            $creditPrincipalAmt,
-                            $order->amount,
-                            $order->fee
-                        );
-                        $bidDetails = [
-                            'BidDetails' => [
-                                [
-                                    'BidOrdId'=>$bidOrder->deal_number,
-                                    'BidOrdDate'=>$bidOrder->OrdDate,
-                                    'BidCreditAmt'=> $creditPrincipalAmt, //从原投标订单中转出的本金
-                                    'BorrowerDetails' => [
-                                        [
-                                            'BorrowerCustId' => CnpnrAccount::find()->where('uid=:userId', [':userId'=>$deal->uid])->one()->UsrCustId,
-                                            'BorrowerCreditAmt' => $creditPrincipalAmt, //从原投标订单借款人转出的已放款金额
-                                            'PrinAmt' => number_format(0, 2, '.', ''), //借款人还款金额中所占的本金部分
+                        if ($order->save())
+                        {
+                            $cnpnr = new ChinaPNR();
+                            $cnpnr->creditAssign(
+                                CnpnrAccount::find()->where('uid=:userId', [':userId'=>$bidOrder->uid])->one()->UsrCustId,
+                                CnpnrAccount::find()->where('uid=:userId', [':userId'=>$userId])->one()->UsrCustId,
+                                $creditPrincipalAmt,
+                                $order->amount,
+                                $order->fee
+                            );
+                            $bidDetails = [
+                                'BidDetails' => [
+                                    [
+                                        'BidOrdId'=>$bidOrder->deal_number,
+                                        'BidOrdDate'=>$bidOrder->OrdDate,
+                                        'BidCreditAmt'=> $creditPrincipalAmt, //从原投标订单中转出的本金
+                                        'BorrowerDetails' => [
+                                            [
+                                                'BorrowerCustId' => CnpnrAccount::find()->where('uid=:userId', [':userId'=>$deal->uid])->one()->UsrCustId,
+                                                'BorrowerCreditAmt' => $creditPrincipalAmt, //从原投标订单借款人转出的已放款金额
+                                                'PrinAmt' => number_format(0, 2, '.', ''), //借款人还款金额中所占的本金部分
+                                            ],
                                         ],
                                     ],
                                 ],
-                            ],
-                        ];
-                        $cnpnr->BidDetails = Json::encode($bidDetails);
-                        $cnpnr->ordId = $order->serial;
-                        $cnpnr->ordDate = substr($order->serial, 0, 8);
-                        $link = $cnpnr->getLink();
+                            ];
+                            $cnpnr->BidDetails = Json::encode($bidDetails);
+                            $cnpnr->ordId = $order->serial;
+                            $cnpnr->ordDate = substr($order->serial, 0, 8);
+                            $link = $cnpnr->getLink();
+                        }
                     }
                 }
-            }
-            else $respCode = -2; //库存不足
+                else $respCode = -4; //库存不足
+            }else $respCode = -3;
         }
-        else $message='指定的债权不存在，无法完成购买！';
-        if ($respCode == -2) $message = '债权数量不足，无法完成购买！';
+        else $respCode = -2;
+        if ($respCode == -2) $message = '指定的债权不存在，无法完成购买！';
+        if ($respCode == -3) $message = '债权未在发售中，无法完成购买！';
+        if ($respCode == -4) $message = '债权数量不足，无法完成购买！';
         Yii::$app->response->format = Response::FORMAT_JSON;
         return [
             'respCode'=>$respCode,
