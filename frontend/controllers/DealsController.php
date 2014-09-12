@@ -32,12 +32,14 @@ class DealsController extends Controller {
         $credits = Credit::find()->where('status=0', [])->all();
         foreach($credits as $credit)
         {
-            $this->actionCreate($credit->order_id, $credit->transfer_shares, $credit->discount_rate, $credit->id);
-//            $ch = curl_init(Yii::$app->urlManager->createUrl('deals/create?
-//            orderNumber='.$credit->order_id.
-//                '&transferShares='.$credit->transfer_shares.
-//                '&discountRate='.$credit->discount_rate.
-//                '&creditId='.$credit->id));
+            $ch = curl_init(Yii::$app->urlManager->createUrl('deals/create?
+            orderNumber='.$credit->order_id.
+                '&transferShares='.$credit->transfer_shares.
+                '&discountRate='.$credit->discount_rate.
+                '&creditId='.$credit->id));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($ch);
+            curl_close($ch);
         }
     }
 
