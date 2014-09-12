@@ -19,6 +19,7 @@ use frontend\models\CreditOrder;
 use Yii;
 use yii\helpers\Json;
 use yii\web\Response;
+use yii\web\UrlManager;
 
 class DealsController extends Controller {
     public function actionIndex()
@@ -26,16 +27,34 @@ class DealsController extends Controller {
         return $this->render('index');
     }
 
+    public function actionCron()
+    {
+        $credits = Credit::find()->where('status=0', [])->all();
+        foreach($credits as $credit)
+        {
+            $this->actionCreate($credit->order_id, $credit->transfer_shares, $credit->discount_rate, $credit->id);
+//            $ch = curl_init(Yii::$app->urlManager->createUrl('deals/create?
+//            orderNumber='.$credit->order_id.
+//                '&transferShares='.$credit->transfer_shares.
+//                '&discountRate='.$credit->discount_rate.
+//                '&creditId='.$credit->id));
+        }
+    }
+
     /**
      * @param $id 投标订单id
      */
-    public function actionCreate($orderNumber, $transferShares=1, $discountRate=0)
+    public function actionCreate($orderNumber, $transferShares=1, $discountRate=0, $creditId = null)
     {
         $respCode = -1;
         $data = null;
         if (DealOrder::canBeTransfer($orderNumber) && $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate))
         {
-            $model = new Credit();
+            if ($creditId)
+                $model = Credit::find($creditId);
+            else
+                $model = new Credit();
+
             $model->transfer_shares = $transferShares;
             foreach($creditData as $k => $v) if ($model->hasAttribute($k)) $model->$k = $v;
             if ($model->validate())
