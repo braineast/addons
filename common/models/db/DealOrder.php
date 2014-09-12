@@ -127,6 +127,7 @@ class DealOrder extends ActiveRecord {
                     'leaving_period'=>$creditLeavingPeriodInDay,
                     'repayment_term_id' => $currentRepaymentOrder->deal_qishu,
                     'shares' => $creditCount,
+                    'transfer_shares' => $creditTransferShares,
                     'discount_rate'=>$creditDiscountRate,
                     'unit_principal_amt'=>$creditUnitPrincipalAmt,
                     'unit_interest_amt'=>$creditUnitInterestAmt,

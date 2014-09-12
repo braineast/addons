@@ -62,7 +62,7 @@ class DealsController extends Controller {
             else
                 $model = new Credit();
 
-            $model->transfer_shares = $transferShares;
+//            $model->transfer_shares = $transferShares;
             foreach($creditData as $k => $v) if ($model->hasAttribute($k)) $model->$k = $v;
             if ($model->validate())
             {
