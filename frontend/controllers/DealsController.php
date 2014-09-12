@@ -33,7 +33,7 @@ class DealsController extends Controller {
     {
         $respCode = -1;
         $data = null;
-        if (/*DealOrder::canBeTransfer($orderNumber) && */$creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate))
+        if (DealOrder::canBeTransfer($orderNumber) && $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate))
         {
             $model = new Credit();
             $model->transfer_shares = $transferShares;
@@ -66,11 +66,11 @@ class DealsController extends Controller {
         {
             $creditData = $credit->attributes;
         }
-        else//if(DealOrder::canBeTransfer($orderNumber))
+        elseif(DealOrder::canBeTransfer($orderNumber))
         {
             $creditData = DealOrder::getCreditDetail($orderNumber, $transferShares, $discountRate);
         }
-//        else $respCode = -2; //该订单不可被转让
+        else $respCode = -2; //该订单不可被转让
         if ($creditData)
         {
             foreach($creditData as $k => $v) if (preg_match('/amt|price|value/i', $k)) $creditData[$k] = number_format($v, 2);
