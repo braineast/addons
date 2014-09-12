@@ -40,6 +40,11 @@ class DealsController extends Controller {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_exec($ch);
             curl_close($ch);
+            var_dump(Yii::$app->urlManager->createUrl('deals/create?
+            orderNumber='.$credit->order_id.
+                '&transferShares='.$credit->transfer_shares.
+                '&discountRate='.$credit->discount_rate.
+                '&creditId='.$credit->id));
         }
     }
 
