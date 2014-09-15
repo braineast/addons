@@ -81,7 +81,7 @@ class DealsController extends Controller {
         $respCode = -1; //未知错误
         $creditData = null;
         $ret = null;
-        $credit = Credit::find()->where('order_id=:orderId', [':orderId'=>$orderNumber])->one();
+        $credit = Credit::find()->where('status = 0 and order_id=:orderId', [':orderId'=>$orderNumber])->one();
         if ($credit)
         {
             $creditData = $credit->attributes;
