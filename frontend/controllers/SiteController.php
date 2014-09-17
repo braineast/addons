@@ -185,4 +185,29 @@ class SiteController extends Controller
 
         var_dump($originalHtContent);
     }
+
+    public function actionCalc()
+    {
+        $amt = 111.2109881;
+
+        $a = $b = $c = $d = $amt / 4;
+
+        $items = [$a, $b, $c, $d];
+
+        $netAmt = 0.00;
+        foreach($items as $item) $netAmt += number_format($item, 2, '.', '');
+        $netAmt = number_format($netAmt, 2, '.', '');
+
+        $amt = number_format($amt, 2, '.', '');
+
+        if ($netAmt != $amt)
+        {
+            $diff = $amt*100 - $netAmt*100;
+        }
+
+        var_dump($netAmt, $amt);
+
+        var_dump($diff);
+
+    }
 }

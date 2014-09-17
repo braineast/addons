@@ -54,7 +54,7 @@ class Credit extends ActiveRecord
             [['user_id', 'order_id', 'transfer_shares', 'discount_rate'], 'required'],
             ['user_id', 'exist', 'targetClass'=>'common\models\db\User', 'targetAttribute'=>'id'],
             ['order_id', 'exist', 'targetClass'=>'common\models\db\DealOrder', 'targetAttribute'=>'deal_number'],
-            ['order_id', 'unique', 'message'=>'该订单已经存在！'],
+            ['order_id', 'unique', 'filter'=>'status=0', 'message'=>'该订单已经存在！'],
             ['transfer_shares', 'number', 'integerOnly' => true, 'min'=>1],
             ['discount_rate', 'number', 'min'=>0, 'max'=>5],
         ];
