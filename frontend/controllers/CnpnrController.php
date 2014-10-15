@@ -52,32 +52,8 @@ class CnpnrController extends Controller
             if ($order = CreditOrder::find()->where('status='.CreditOrder::STATUS_UNPAID.' and serial=:orderId', [':orderId'=>$this->response[ChinaPNR::PARAM_ORDID]])->one())
             {
                 $credit = Credit::find()->where('id=:creditId', [':creditId'=>$order->credit_id])->one();
-                if ($order->shares > $credit->in_stock_shares)
+                if ( $credit->in_stock_shares >= $order->shares)
                 {
-                    exit('债权超卖了，请撤单！');//@todo how to cancel the creditAssign order?
-                }
-                else
-                {
-                    /*
-                    //Update user data that belonging to account balance
-                    $acctSeek = [
-                        $credit->user_id,
-                        $order->user_id,
-                        Deal::find()->where('deal_id=:dealId', [':dealId'=>$credit->deal_id])->one()->uid,
-                    ];
-                    foreach($acctSeek as $userId)
-                    {
-                        $acct = Account::find()->where('uid=:userId', [':userId'=>$userId])->one();
-                        $acctData = ChinaPNR::queryBalanceBg(CnpnrAccount::find()->where('uid=:userId', [':userId'=>$userId])->one()->UsrCustId);
-                        if ($acctData && $acctData['RespCode'] == '000')
-                        {
-                            $acct->AcctBal = number_format(preg_replace('/,/', '', $acctData['AcctBal']), 2, '.', '');
-                            $acct->AvlBal = number_format(preg_replace('/,/', '', $acctData['AvlBal']), 2, '.', '');
-                            $acct->FrzBal = number_format(preg_replace('/,/', '', $acctData['FrzBal']), 2, '.', '');
-                            $acct->save();
-                        }
-                    }
-                    */
                     $order->status = CreditOrder::STATUS_PAID;
                     if ($order->validate())
                     {
@@ -87,33 +63,30 @@ class CnpnrController extends Controller
                             {
                                 $repaymentOrders = RepaymentOrder::find()->where('deal_number=:dealOrderId and status=1', [':dealOrderId'=>$credit->order_id])->orderBy('deal_qishu')->all();
                                 $remainedPrincipalAmt = 0.00;
+                                $remainedInterestAmt = 0.00;
                                 foreach ($repaymentOrders as $val)
                                 {
                                     if ($val->status == 1)
                                     {
                                         $remainedPrincipalAmt += $val->benjin;
-//                                        $remainedInterestAmt += $repaymentOrder->lixi;
-//                                        if ($nextRepaymentDate < $repaymentOrder->refund_time)
-//                                            $nextRepaymentDate = $repaymentOrder->refund_time;
-//                                        if (time() < $repaymentOrder->refund_time)
-//                                        {
-//                                            $currentTermId = min($currentTermId, $repaymentOrder->deal_qishu);
-//                                            $currentRepaymentOrder = $repaymentOrder;
-//                                        }
+                                        $remainedInterestAmt += $val->lixi;
                                     }
-                                    /**
-                                    if ($repaymentOrder->status == 2)
-                                    {
-                                        $retrievedPrincipalAmt += $repaymentOrder->benjin;
-                                        $retrievedInterestAmt += $repaymentOrder->lixi;
-                                        if ($lastRepaymentDate < $repaymentOrder->refund_time)
-                                            $lastRepaymentDate = $repaymentOrder->refund_time;
-                                    }
-                                     * */
                                 }
                                 $creditCount = intval($remainedPrincipalAmt / 100) ? intval($remainedPrincipalAmt / 100) : ($remainedPrincipalAmt ? 1 : 0);
                                 foreach($repaymentOrders as $repaymentOrderItem)
                                 {
+                                    $currentOrderInterestAmt = 0.00;
+                                    $OriginalOrderInterestAmt = 0.00;
+                                    $totalInterestAmt = $repaymentOrderItem->lixi;
+                                    if ($totalInterestAmt)
+                                    {
+                                        $currentOrderInterestAmt = round($totalInterestAmt / $creditCount * $order->shares, 4);
+                                        $OriginalOrderInterestAmt = round($totalInterestAmt - $currentOrderInterestAmt, 4);
+                                        if ($splitInterest = self::balanceSplit($totalInterestAmt, [$currentOrderInterestAmt, $OriginalOrderInterestAmt]))
+                                        {
+                                            list($currentOrderInterestAmt, $OriginalOrderInterestAmt) = $splitInterest;
+                                        }
+                                    }
                                     $repaymentOrder = new RepaymentOrder();
                                     $repaymentOrder->uid = $order->user_id;
                                     $repaymentOrder->deal_id = $repaymentOrderItem->deal_id;
@@ -122,32 +95,32 @@ class CnpnrController extends Controller
                                     $repaymentOrder->deal_qishu = $repaymentOrderItem->deal_qishu;
                                     $repaymentOrder->Buid = $repaymentOrderItem->Buid;
                                     $repaymentOrder->benjin = $order->principal_amt * $order->shares;
-                                    $repaymentOrder->lixi = $repaymentOrderItem->lixi / $creditCount * $order->shares;
+                                    $repaymentOrder->lixi = $currentOrderInterestAmt;
                                     $repaymentOrder->benxi = $repaymentOrder->benjin + $repaymentOrder->lixi;
                                     $repaymentOrder->refund_time = $repaymentOrderItem->refund_time;
                                     $repaymentOrder->log = '';
-                                    $repaymentOrder->save();
-                                    $originalRepaymentOrder = new RepaymentOrder();
-                                    $originalRepaymentOrder->uid = $repaymentOrderItem->uid;
-                                    $originalRepaymentOrder->deal_id = $repaymentOrderItem->deal_id;
-                                    $originalRepaymentOrder->deal_number = $repaymentOrderItem->deal_number;
-                                    $originalRepaymentOrder->deal_time = $repaymentOrderItem->deal_time;
-                                    $originalRepaymentOrder->deal_qishu = $repaymentOrderItem->deal_qishu;
-                                    $originalRepaymentOrder->Buid = $repaymentOrderItem->Buid;
-                                    $originalRepaymentOrder->benjin = $repaymentOrderItem->benjin - $repaymentOrder->benjin;
-                                    $originalRepaymentOrder->lixi = $repaymentOrderItem->lixi - $repaymentOrder->lixi;
-                                    $originalRepaymentOrder->benxi = $originalRepaymentOrder->benjin + $originalRepaymentOrder->lixi;
-                                    $originalRepaymentOrder->refund_time = $repaymentOrderItem->refund_time;
-                                    $originalRepaymentOrder->log = $repaymentOrderItem->log;
-                                    if ($originalRepaymentOrder->validate())
+                                    if ($repaymentOrder->save())
                                     {
-                                        if ($originalRepaymentOrder->save())
+                                        $originalOrderPrincipalAmt = $repaymentOrderItem->benjin - $repaymentOrder->benjin;
+                                        if ($originalOrderPrincipalAmt > 0 || $OriginalOrderInterestAmt > 0)
                                         {
-                                            $repaymentOrderItem->status = 3;
-                                            $repaymentOrderItem->save();
+                                            $originalRepaymentOrder = new RepaymentOrder();
+                                            $originalRepaymentOrder->uid = $repaymentOrderItem->uid;
+                                            $originalRepaymentOrder->deal_id = $repaymentOrderItem->deal_id;
+                                            $originalRepaymentOrder->deal_number = $repaymentOrderItem->deal_number;
+                                            $originalRepaymentOrder->deal_time = $repaymentOrderItem->deal_time;
+                                            $originalRepaymentOrder->deal_qishu = $repaymentOrderItem->deal_qishu;
+                                            $originalRepaymentOrder->Buid = $repaymentOrderItem->Buid;
+                                            $originalRepaymentOrder->benjin = $originalOrderPrincipalAmt;
+                                            $originalRepaymentOrder->lixi = $OriginalOrderInterestAmt;
+                                            $originalRepaymentOrder->benxi = $originalRepaymentOrder->benjin + $originalRepaymentOrder->lixi;
+                                            $originalRepaymentOrder->refund_time = $repaymentOrderItem->refund_time;
+                                            $originalRepaymentOrder->log = $repaymentOrderItem->log;
+                                            if ($originalRepaymentOrder->validate()) $originalRepaymentOrder->save();
                                         }
+                                        $repaymentOrderItem->status = 3;
+                                        $repaymentOrderItem->save();
                                     }
-                                    else var_dump($originalRepaymentOrder->errors);
                                 }
                             }
                         }
@@ -177,6 +150,86 @@ class CnpnrController extends Controller
     private function _getUser()
     {
         var_dump(\Yii::$app->getUser());
+    }
+
+    public static function balanceSplit($totalAmt, $actorValues = [])
+    {
+        $result = [];
+        if ($totalAmt && $actorValues)
+        {
+            $totalAmt = round($totalAmt, 2);
+            $tmpValues = [];
+            foreach($actorValues as $k => $v)
+            {
+                $tmpValues[$k] = round($v, 2);
+            }
+            $tmpAmt = number_format(array_sum($tmpValues), 2, '.', '');
+            $diff = bcsub($totalAmt, $tmpAmt, 2);
+            if ($diff)
+            {
+                if (abs($diff) * 100 >= count($actorValues))
+                    return false;
+                $tmpValues = [];
+                foreach($actorValues as $k => $v)
+                {
+                    $v = number_format($v, 4, '.', '');
+                    $v = substr($v, 0, strpos($v, '.') + 4);
+                    $lastDigit = substr($v, -1);
+                    $tmpValues[$lastDigit][$k] = $v;
+                }
+                if ($diff < 0)
+                {
+                    $diff = abs($diff) * 100;
+                    ksort($tmpValues);
+                    while($diff)
+                    {
+                        foreach($tmpValues as $k => $v)
+                        {
+                            if ($k > 4)
+                            {
+                                foreach($v as $key => $value)
+                                {
+                                    $tmpValues[$k][$key] = substr($value, 0, strpos($value, '.') + 3);
+                                    $diff--;
+                                    if (!$diff) break;
+                                }
+                            }
+                            if (!$diff) break;
+                        }
+                    }
+                }
+                elseif ($diff > 0)
+                {
+                    $diff = abs($diff) * 100;
+                    krsort($tmpValues);
+                    while($diff)
+                    {
+                        foreach($tmpValues as $k => $v)
+                        {
+                            if ($k < 5)
+                            {
+                                foreach($v as $key => $value)
+                                {
+                                    $tmpValues[$k][$key] = number_format(substr($value, 0, strpos($value, '.') + 3).'5',3,'.', '');
+                                    $diff--;
+                                    if (!$diff) break;
+                                }
+                            }
+                            if (!$diff) break;
+                        }
+                    }
+                }
+                foreach($tmpValues as $v)
+                {
+                    foreach($v as $key => $value)
+                    {
+                        $result[$key] = number_format($value, 2, '.', '');
+                    }
+                }
+                if (array_sum($result) != $totalAmt) $result = false;
+            }
+        }
+        return $result;
     }
 
 }
