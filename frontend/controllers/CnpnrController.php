@@ -18,6 +18,8 @@ use frontend\models\Credit;
 use frontend\models\CreditOrder;
 use frontend\models\TenderForm;
 
+use Yii;
+
 class CnpnrController extends Controller
 {
     public $enableCsrfValidation = false;
@@ -82,6 +84,9 @@ class CnpnrController extends Controller
                                     {
                                         $currentOrderInterestAmt = round($totalInterestAmt / $creditCount * $order->shares, 4);
                                         $originalOrderInterestAmt = round($totalInterestAmt - $currentOrderInterestAmt, 4);
+                                        Yii::$app->log('begin');
+                                        Yii::$app->log(serialize(self::balanceSplit($totalInterestAmt, [$currentOrderInterestAmt, $originalOrderInterestAmt])));
+                                        Yii::$app->log('end');
                                         if ($splitInterest = self::balanceSplit($totalInterestAmt, [$currentOrderInterestAmt, $originalOrderInterestAmt]))
                                         {
                                             list($currentOrderInterestAmt, $originalOrderInterestAmt) = $splitInterest;
