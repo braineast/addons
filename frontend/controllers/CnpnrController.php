@@ -219,6 +219,7 @@ class CnpnrController extends Controller
                         }
                     }
                 }
+                else return $actorValues;
                 foreach($tmpValues as $v)
                 {
                     foreach($v as $key => $value)
