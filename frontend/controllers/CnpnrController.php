@@ -75,16 +75,16 @@ class CnpnrController extends Controller
                                 $creditCount = intval($remainedPrincipalAmt / 100) ? intval($remainedPrincipalAmt / 100) : ($remainedPrincipalAmt ? 1 : 0);
                                 foreach($repaymentOrders as $repaymentOrderItem)
                                 {
+                                    $originalOrderInterestAmt = $repaymentOrderItem->lixi;
                                     $currentOrderInterestAmt = 0.00;
-                                    $OriginalOrderInterestAmt = 0.00;
-                                    $totalInterestAmt = $repaymentOrderItem->lixi;
+                                    $totalInterestAmt = $originalOrderInterestAmt;
                                     if ($totalInterestAmt)
                                     {
                                         $currentOrderInterestAmt = round($totalInterestAmt / $creditCount * $order->shares, 4);
-                                        $OriginalOrderInterestAmt = round($totalInterestAmt - $currentOrderInterestAmt, 4);
-                                        if ($splitInterest = self::balanceSplit($totalInterestAmt, [$currentOrderInterestAmt, $OriginalOrderInterestAmt]))
+                                        $originalOrderInterestAmt = round($totalInterestAmt - $currentOrderInterestAmt, 4);
+                                        if ($splitInterest = self::balanceSplit($totalInterestAmt, [$currentOrderInterestAmt, $originalOrderInterestAmt]))
                                         {
-                                            list($currentOrderInterestAmt, $OriginalOrderInterestAmt) = $splitInterest;
+                                            list($currentOrderInterestAmt, $originalOrderInterestAmt) = $splitInterest;
                                         }
                                     }
                                     $repaymentOrder = new RepaymentOrder();
@@ -102,7 +102,7 @@ class CnpnrController extends Controller
                                     if ($repaymentOrder->save())
                                     {
                                         $originalOrderPrincipalAmt = $repaymentOrderItem->benjin - $repaymentOrder->benjin;
-                                        if ($originalOrderPrincipalAmt > 0 || $OriginalOrderInterestAmt > 0)
+                                        if ($originalOrderPrincipalAmt > 0 || $originalOrderInterestAmt > 0)
                                         {
                                             $originalRepaymentOrder = new RepaymentOrder();
                                             $originalRepaymentOrder->uid = $repaymentOrderItem->uid;
@@ -112,7 +112,7 @@ class CnpnrController extends Controller
                                             $originalRepaymentOrder->deal_qishu = $repaymentOrderItem->deal_qishu;
                                             $originalRepaymentOrder->Buid = $repaymentOrderItem->Buid;
                                             $originalRepaymentOrder->benjin = $originalOrderPrincipalAmt;
-                                            $originalRepaymentOrder->lixi = $OriginalOrderInterestAmt;
+                                            $originalRepaymentOrder->lixi = $originalOrderInterestAmt;
                                             $originalRepaymentOrder->benxi = $originalRepaymentOrder->benjin + $originalRepaymentOrder->lixi;
                                             $originalRepaymentOrder->refund_time = $repaymentOrderItem->refund_time;
                                             $originalRepaymentOrder->log = $repaymentOrderItem->log;
